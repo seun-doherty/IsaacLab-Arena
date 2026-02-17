@@ -219,12 +219,12 @@ class DsubPlug(LibraryObject):
         super().__init__(instance_name=instance_name, prim_path=prim_path, initial_pose=initial_pose)
 
 @register_asset
-class FactoryPlug8mm(LibraryObject):
+class FactoryPeg8mm(LibraryObject):
     """
-    Encapsulates the Factory plug object.
+    Encapsulates the Factory peg 8mm object.
     """
 
-    name = "factory_plug_8mm"
+    name = "factory_peg_8mm"
     tags = ["object"]
     usd_path = f"https://isaac-dev.ov.nvidia.com/omni/web3/omniverse://isaac-dev.ov.nvidia.com/Projects/GTC2026_IL-ARENA_NIST/NIST/factory_peg_8mm.usd"
     scale = (1.0, 1.0, 1.0)

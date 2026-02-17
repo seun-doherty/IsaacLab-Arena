@@ -78,6 +78,34 @@ class NISTGearMeshEnvironment(ExampleEnvironmentBase):
             )
         )
 
+        # kit_tray.set_initial_pose(
+        #     Pose(
+        #         position_xyz=(0.14, 0.38, -0.02),  # Kit tray position
+        #         rotation_wxyz=(1.0, 0.0, 0.0, 0.0),
+        #     )
+        # )
+
+        # bnc_plug.set_initial_pose(
+        #     Pose(
+        #         position_xyz=(0.14, 0.38, -0.02),  # BNC plug position
+        #         rotation_wxyz=(1.0, 0.0, 0.0, 0.0),
+        #     )
+        # )
+
+        # dsub_plug.set_initial_pose(
+        #     Pose(
+        #         position_xyz=(0.14, 0.38, -0.02),  # D-SUB plug position
+        #         rotation_wxyz=(1.0, 0.0, 0.0, 0.0),
+        #     )
+        # )
+
+        # factory_peg_8mm.set_initial_pose(
+        #     Pose(
+        #         position_xyz=(0.14, 0.38, -0.02),  # Factory peg 8mm position
+        #         rotation_wxyz=(1.0, 0.0, 0.0, 0.0),
+        #     )
+        # )
+
         # board.set_initial_pose(
         #     Pose(
         #         position_xyz=(0.14, 0.38, -0.02),   # NIST board position
