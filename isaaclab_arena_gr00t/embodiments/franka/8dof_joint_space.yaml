@@ -1,0 +1,12 @@
+# Franka Panda 7 DOF End-Effector Action Space
+# 6 DOF end-effector deltas (dx, dy, dz, droll, dpitch, dyaw) + 1 DOF gripper command
+# Used for: policy action output
+
+joints:
+  - delta_x          # End-effector position delta X
+  - delta_y          # End-effector position delta Y
+  - delta_z          # End-effector position delta Z
+  - delta_roll       # End-effector rotation delta (roll)
+  - delta_pitch      # End-effector rotation delta (pitch)
+  - delta_yaw        # End-effector rotation delta (yaw)
+  - gripper_cmd      # Gripper command (controls both fingers)

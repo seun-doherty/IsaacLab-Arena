@@ -1,0 +1,59 @@
+# Copyright (c) 2025-2026, The Isaac Lab Arena Project Developers.
+# SPDX-License-Identifier: Apache-2.0
+#
+# SmolVLA closed-loop policy configuration for Franka manipulation.
+#
+# This YAML is loaded by SmolVLAClosedloopPolicy via SmolVLAClosedloopPolicyConfig.
+# It mirrors the structure of gr1_manip_gr00t_closedloop_config.yaml but drops
+# GR00T-specific fields (embodiment_tag, modality_config_path, joint remapping).
+# ---------------------------------------------------------------------------
+
+# ── Model ──────────────────────────────────────────────────────────────────
+# Either a HuggingFace repo id (e.g. "lerobot/smolvla_base") or a local path
+# to a fine-tuned checkpoint directory.
+
+# Default path for container/CI: workspace training_outputs; override for your machine if needed.
+model_path: "/workspaces/isaaclab_arena/training_outputs/smolvla_franka/checkpoints/000100/pretrained_model"
+
+# Natural-language task instruction.
+language_instruction: "Pick up the gear and place it on the shaft."
+
+# ── Action chunking ───────────────────────────────────────────────────────
+# action_horizon: total number of future actions the model predicts.
+# action_chunk_length: how many of those are actually executed before a new
+#   forward pass.  Must be <= action_horizon.
+action_horizon: 10
+action_chunk_length: 10
+
+# ── Camera / observation ──────────────────────────────────────────────────
+# Key inside observation["camera_obs"] that holds the wrist RGB tensor.
+# The Franka camera config field is 'wrist_cam' with data_type 'rgb',
+# so the IsaacLab observation manager exposes it as 'wrist_cam_rgb'.
+pov_cam_name_sim: "wrist_cam_rgb"
+
+# Suffix for the LeRobot frame key  →  observation.images.<this_value>
+observation_image_key_lerobot: "wrist"
+
+# Key inside observation["policy"] that holds the robot state tensor.
+# Franka uses 'joint_pos' (9D: 7 arm + 2 gripper).
+state_obs_key: "joint_pos"
+
+# ── Image size ────────────────────────────────────────────────────────────
+# SmolVLA's default resize-with-padding target is 512×512.
+# The actual raw image from IsaacLab may be smaller (e.g. 200×200);
+# the model's internal resize_with_pad handles upscaling.
+target_image_height: 200
+target_image_width: 200
+
+# ── Robot dimensions ──────────────────────────────────────────────────────
+# Franka:
+#   state_dim = 9   (7 arm joints + 2 gripper finger joints)
+#   action_dim = 7  (6 EE deltas + 1 gripper command)
+state_dim: 9
+action_dim: 7
+
+# ── Device ────────────────────────────────────────────────────────────────
+policy_device: "cuda"
+
+# ── Reproducibility ───────────────────────────────────────────────────────
+seed: 42

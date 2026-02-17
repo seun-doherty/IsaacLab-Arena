@@ -1,0 +1,20 @@
+{
+    "jobs": [
+        {
+            "name": "franka_gear_mesh_smolvla",
+            "arena_env_args": {
+                "enable_cameras": true,
+                "num_envs": 1,
+                "environment": "nist_gear_mesh",
+                "embodiment": "franka"
+            },
+            "num_steps": 750,
+            "policy_type": "isaaclab_arena_smolvla.policy.smolvla_closedloop_policy.SmolVLAClosedloopPolicy",
+            "policy_config_dict": {
+                "policy_config_yaml_path": "isaaclab_arena_smolvla/policy/config/franka_smolvla_closedloop_config.yaml",
+                "policy_device": "cuda:0",
+                "num_envs": 1
+            }
+        }
+    ]
+}

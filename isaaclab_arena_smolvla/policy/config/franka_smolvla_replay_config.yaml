@@ -1,0 +1,22 @@
+# Copyright (c) 2025-2026, The Isaac Lab Arena Project Developers.
+# SPDX-License-Identifier: Apache-2.0
+#
+# Replay-action policy configuration for the Franka robot.
+#
+# This config is used by ReplayLerobotFrankaPolicy to replay recorded actions
+# from a standard LeRobot v3.0 dataset (no GR00T, no joint remapping).
+# ---------------------------------------------------------------------------
+
+# ── Dataset ────────────────────────────────────────────────────────────────
+# Absolute or relative path to the LeRobot v3.0 dataset directory.
+# The converter script outputs to this location.
+dataset_path: "datasets/arena_gear_mesh_dataset_recorded_wcams/lerobot"
+
+# ── Action chunking ───────────────────────────────────────────────────────
+# For replay we feed one recorded action per sim step.
+action_horizon: 1
+action_chunk_length: 1
+
+# ── Robot dimensions ──────────────────────────────────────────────────────
+# Franka: 6 EE deltas + 1 gripper command = 7
+action_dim: 7

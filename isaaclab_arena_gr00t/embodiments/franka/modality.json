@@ -1,0 +1,48 @@
+{
+    "state": {
+      "joint_position": {
+        "original_key": "observation.state",
+        "start": 0,
+        "end": 7,
+        "shape": [7]
+      },
+      "gripper_position": {
+        "original_key": "observation.state",
+        "start": 7,
+        "end": 9,
+        "shape": [2]
+      }
+    },
+    "action": {
+      "end_effector_motion": {
+        "original_key": "action",
+        "start": 0,
+        "end": 6,
+        "shape": [6],
+        "description": "Relative end-effector motion: [dx, dy, dz, droll, dpitch, dyaw]"
+      },
+      "gripper_action": {
+        "original_key": "action",
+        "start": 6,
+        "end": 7,
+        "shape": [1]
+      }
+    },
+    "video": {
+      "wrist": {
+        "original_key": "observation.images.wrist",
+        "shape": [3, 480, 640]
+      },
+      "table": {
+        "original_key": "observation.images.table",
+        "shape": [3, 480, 640]
+      }
+    },
+    "annotation": {
+      "task_description": {
+        "original_key": "task_index",
+        "shape": [1]
+      }
+    }
+  }
+  

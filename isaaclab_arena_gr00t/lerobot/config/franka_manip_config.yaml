@@ -1,0 +1,75 @@
+# Copyright (c) 2025-2026, The Isaac Lab Arena Project Developers
+# All rights reserved.
+#
+# SPDX-License-Identifier: Apache-2.0
+
+
+# Gr00tDatasetConfig Configuration
+# Franka Panda manipulation with dual camera setup
+
+
+# Root directory for all data storage
+data_root: "datasets/"
+
+
+# Instruction given to the policy in natural language
+language_instruction: "Pick up the gear mesh and place it on the gear base."
+task_index: 0
+
+
+# Name of the HDF5 file to use for the dataset
+hdf5_name: "arena_gear_mesh_dataset_recorded_wcams.hdf5"
+
+
+# Simulation HDF5 datafield names
+state_name_sim: "obs/joint_pos"
+action_name_sim: "actions"
+eef_pos_name_sim: "obs/eef_pos"
+eef_quat_name_sim: "obs/eef_quat"
+pov_cam_name_sim: "obs/wrist_cam"
+table_cam_name_sim: "obs/table_cam"
+
+
+# LeRobot datafield names
+state_name_lerobot: "observation.state"
+action_name_lerobot: "action"
+wrist_video_name_lerobot: "observation.images.wrist"
+table_video_name_lerobot: "observation.images.table"
+task_description_lerobot: "annotation.human.action.task_description"
+
+
+# Parquet configuration
+chunks_size: 100
+
+
+# Video configuration
+fps: 30
+
+
+# File path templates
+data_path: "data/chunk-{episode_chunk:03d}/episode_{episode_index:06d}.parquet"
+video_path: "videos/chunk-{episode_chunk:03d}/{video_key}/episode_{episode_index:06d}.mp4"
+
+
+# Configuration file paths
+modality_template_path: "isaaclab_arena_gr00t/embodiments/franka/modality.json"
+modality_fname: "modality.json"
+episodes_fname: "episodes.jsonl"
+tasks_fname: "tasks.jsonl"
+info_template_path: "isaaclab_arena_gr00t/embodiments/franka/info.json"
+info_fname: "info.json"
+
+
+# Policy specific parameters (7dof end-effector space control)
+policy_joints_config_path: "isaaclab_arena_gr00t/embodiments/franka/8dof_joint_space.yaml"
+robot_type: "franka_panda"
+
+
+# Robot simulation specific parameters
+action_joints_config_path: "isaaclab_arena_gr00t/embodiments/franka/8dof_joint_space.yaml"
+state_joints_config_path: "isaaclab_arena_gr00t/embodiments/franka/9dof_joint_space.yaml"
+
+
+# Image configuration (height, width, channels)
+original_image_size: [200, 200, 3]
+target_image_size: [200, 200, 3]

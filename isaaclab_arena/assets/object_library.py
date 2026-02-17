@@ -186,6 +186,70 @@ class NistBoard(LibraryObject):
     ):
         super().__init__(instance_name=instance_name, prim_path=prim_path, initial_pose=initial_pose)
 
+@register_asset
+class BncPlug(LibraryObject):
+    """
+    Encapsulates the BNC plug object.
+    """
+
+    name = "bnc_plug"
+    tags = ["object"]
+    usd_path = f"https://isaac-dev.ov.nvidia.com/omni/web3/omniverse://isaac-dev.ov.nvidia.com/Projects/GTC2026_IL-ARENA_NIST/NIST/bnc_plug.usd"
+    scale = (1.0, 1.0, 1.0)
+
+    def __init__(
+        self, instance_name: str | None = None, prim_path: str | None = None, initial_pose: Pose | None = None
+    ):
+        super().__init__(instance_name=instance_name, prim_path=prim_path, initial_pose=initial_pose)
+
+@register_asset
+class DsubPlug(LibraryObject):
+    """
+    Encapsulates the D-SUB plug object.
+    """
+
+    name = "dsub_plug"
+    tags = ["object"]
+    usd_path = f"https://isaac-dev.ov.nvidia.com/omni/web3/omniverse://isaac-dev.ov.nvidia.com/Projects/GTC2026_IL-ARENA_NIST/NIST/dsub_plug.usd"
+    scale = (1.0, 1.0, 1.0)
+
+    def __init__(
+        self, instance_name: str | None = None, prim_path: str | None = None, initial_pose: Pose | None = None
+    ):
+        super().__init__(instance_name=instance_name, prim_path=prim_path, initial_pose=initial_pose)
+
+@register_asset
+class FactoryPlug8mm(LibraryObject):
+    """
+    Encapsulates the Factory plug object.
+    """
+
+    name = "factory_plug_8mm"
+    tags = ["object"]
+    usd_path = f"https://isaac-dev.ov.nvidia.com/omni/web3/omniverse://isaac-dev.ov.nvidia.com/Projects/GTC2026_IL-ARENA_NIST/NIST/factory_peg_8mm.usd"
+    scale = (1.0, 1.0, 1.0)
+
+    def __init__(
+        self, instance_name: str | None = None, prim_path: str | None = None, initial_pose: Pose | None = None
+    ):
+        super().__init__(instance_name=instance_name, prim_path=prim_path, initial_pose=initial_pose)
+
+@register_asset
+class KitTray(LibraryObject):
+    """
+    Encapsulates the Kit tray object.
+    """
+
+    name = "kit_tray"
+    tags = ["object"]
+    usd_path = f"https://isaac-dev.ov.nvidia.com/omni/web3/omniverse://isaac-dev.ov.nvidia.com/Projects/GTC2026_IL-ARENA_NIST/NIST/kit_tray.usd"
+    scale = (1.0, 1.0, 1.0)
+
+    def __init__(
+        self, instance_name: str | None = None, prim_path: str | None = None, initial_pose: Pose | None = None
+    ):
+        super().__init__(instance_name=instance_name, prim_path=prim_path, initial_pose=initial_pose)
+
 #-------------------------------------------------------------------------------------------
 @register_asset
 class SugarBox(LibraryObject):
