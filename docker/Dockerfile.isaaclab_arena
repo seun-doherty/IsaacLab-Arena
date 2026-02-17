@@ -2,8 +2,8 @@ ARG BASE_IMAGE=nvcr.io/nvidia/isaac-sim:5.0.0
 
 FROM ${BASE_IMAGE}
 
-# GR00T Policy Build Arguments, these are only used if INSTALL_GROOT is true
-ARG INSTALL_GROOT=false
+# GR00T Policy Build Arguments (commented out to avoid conflicts with smolVLA)
+# ARG INSTALL_GROOT=false
 
 ARG WORKDIR="/workspace"
 ENV WORKDIR=${WORKDIR}
@@ -84,37 +84,60 @@ RUN pip install huggingface-hub[cli]
 RUN echo "alias hf='/usr/local/bin/hf'" >> /etc/bash.bashrc
 
 ###############################
-# Install GR00T and CUDA 12.8 #
+# SmolVLA / LeRobot (policy + deps)
+# Versions pinned from deps/requirements_env_isaaclab.txt and env_isaaclab_dependencies.md (working env).
 ###############################
-# Copy CUDA 12.8 installation script
-COPY docker/setup/install_cuda.sh /tmp/install_cuda.sh
-RUN chmod +x /tmp/install_cuda.sh
-# If GR00T deps to be installed, install cuda 12.8 (needed for flash-attn, and avoid 4G memory addon)
-RUN if [ "$INSTALL_GROOT" = "true" ]; then \
-    /tmp/install_cuda.sh; \
-  else \
-    echo "Skipping CUDA 12.8 installation"; \
-  fi && \
-  rm -f /tmp/install_cuda.sh
-# Copy GR00T
-COPY ./submodules/Isaac-GR00T ${WORKDIR}/submodules/Isaac-GR00T
-# Copy GR00T dependencies installation script
-COPY docker/setup/install_gr00t_deps.sh /tmp/install_gr00t_deps.sh
-RUN chmod +x /tmp/install_gr00t_deps.sh
-# Install GR00T dependencies if requested
-RUN if [ "$INSTALL_GROOT" = "true" ]; then \
-    /tmp/install_gr00t_deps.sh; \
-  else \
-    echo "Skipping GR00T installation"; \
-  fi && \
-  # Clean up installation scripts
-  rm -f /tmp/install_gr00t_deps.sh
+RUN apt-get update && apt-get install -y --no-install-recommends ffmpeg \
+    && rm -rf /var/lib/apt/lists/*
+# Constrain torch and numpy so pip never replaces Isaac Sim's bundled torch or breaks pinocchio (numpy 1.x).
+COPY deps/requirements_smolvla_docker.txt /tmp/requirements_smolvla_docker.txt
+RUN echo "torch>=2.7.0,<2.8.0" > /tmp/constraints.txt && \
+    echo "numpy==1.26.0" >> /tmp/constraints.txt && \
+    /isaac-sim/python.sh -m pip install --no-cache-dir -c /tmp/constraints.txt -r /tmp/requirements_smolvla_docker.txt && \
+    rm -f /tmp/requirements_smolvla_docker.txt
+# Install lerobot only (--no-deps) to avoid pip resolution-too-deep; deps already from step above + Isaac Sim.
+RUN /isaac-sim/python.sh -m pip install --no-cache-dir --no-deps "lerobot[smolvla]"
+
+# Pre-download SmolVLM and lerobot/smolvla_base so training uses image cache at runtime (avoids HF 429 / token).
+# If build fails with 429, pass token: docker build --build-arg HF_TOKEN=your_token ...
+ENV HF_HOME=/workspace/.cache/huggingface
+ENV TRANSFORMERS_CACHE=/workspace/.cache/huggingface/hub
+ARG HF_TOKEN
+RUN mkdir -p /workspace/.cache/huggingface/hub && HF_TOKEN="$HF_TOKEN" /isaac-sim/python.sh -c "import os; from huggingface_hub import snapshot_download; t=os.environ.get('HF_TOKEN') or None; snapshot_download('HuggingFaceTB/SmolVLM2-500M-Video-Instruct', cache_dir='/workspace/.cache/huggingface/hub', token=t); snapshot_download('lerobot/smolvla_base', cache_dir='/workspace/.cache/huggingface/hub', token=t)" && chmod -R a+rwX /workspace/.cache/huggingface
+
+###############################
+# Install GR00T and CUDA 12.8 (commented out to avoid conflicts with smolVLA)
+###############################
+# # Copy CUDA 12.8 installation script
+# COPY docker/setup/install_cuda.sh /tmp/install_cuda.sh
+# RUN chmod +x /tmp/install_cuda.sh
+# # If GR00T deps to be installed, install cuda 12.8 (needed for flash-attn, and avoid 4G memory addon)
+# RUN if [ "$INSTALL_GROOT" = "true" ]; then \
+#     /tmp/install_cuda.sh; \
+#   else \
+#     echo "Skipping CUDA 12.8 installation"; \
+#   fi && \
+#   rm -f /tmp/install_cuda.sh
+# # Copy GR00T
+# COPY ./submodules/Isaac-GR00T ${WORKDIR}/submodules/Isaac-GR00T
+# # Copy GR00T dependencies installation script
+# COPY docker/setup/install_gr00t_deps.sh /tmp/install_gr00t_deps.sh
+# RUN chmod +x /tmp/install_gr00t_deps.sh
+# # Install GR00T dependencies if requested
+# RUN if [ "$INSTALL_GROOT" = "true" ]; then \
+#     /tmp/install_gr00t_deps.sh; \
+#   else \
+#     echo "Skipping GR00T installation"; \
+#   fi && \
+#   # Clean up installation scripts
+#   rm -f /tmp/install_gr00t_deps.sh
 
 # Copy the rest of the files
 COPY *.* ${WORKDIR}/
 COPY isaaclab_arena ${WORKDIR}/isaaclab_arena
 COPY isaaclab_arena_g1 ${WORKDIR}/isaaclab_arena_g1
-COPY isaaclab_arena_gr00t ${WORKDIR}/isaaclab_arena_gr00t
+# COPY isaaclab_arena_gr00t ${WORKDIR}/isaaclab_arena_gr00t  # Commented out with GR00T to avoid conflicts
+COPY isaaclab_arena_smolvla ${WORKDIR}/isaaclab_arena_smolvla
 COPY isaaclab_arena_environments ${WORKDIR}/isaaclab_arena_environments
 COPY docs ${WORKDIR}/docs
 

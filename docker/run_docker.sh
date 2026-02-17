@@ -65,6 +65,9 @@ while getopts ":d:m:e:hn:rn:Rn:vn:gn:" OPTION; do
             echo "  -r (Force rebuilding of the docker image.)"
             echo "  -R (Force rebuilding of the docker image, without cache.)"
             echo "  -g (Install GR00T N1.6 dependencies.)"
+            echo ""
+            echo "SmolVLM download: If the build fails with Hugging Face 429 rate limit, set HF_TOKEN and rebuild:"
+            echo "  HF_TOKEN=your_hf_token $script_name -r"
             exit 0
             ;;
         \?)
@@ -92,11 +95,19 @@ if [ "$(docker images -q $DOCKER_IMAGE_NAME:$DOCKER_VERSION_TAG 2> /dev/null)" ]
     echo "Docker image $DOCKER_IMAGE_NAME:$DOCKER_VERSION_TAG already exists. Not rebuilding."
     echo "Use -r option to force the rebuild."
 else
+    HF_BUILD_ARG=""
+    if [ -n "${HF_TOKEN:-}" ]; then
+        HF_BUILD_ARG="--build-arg HF_TOKEN=${HF_TOKEN}"
+        echo "Using HF_TOKEN for SmolVLM download (avoids Hugging Face 429 rate limit)."
+    else
+        echo "Tip: If the build fails with Hugging Face 429, set HF_TOKEN and rebuild: HF_TOKEN=your_token $0 -r"
+    fi
     docker build --pull \
         $NO_CACHE \
         --progress=plain \
         --build-arg WORKDIR="${WORKDIR}" \
         --build-arg INSTALL_GROOT=$INSTALL_GROOT \
+        $HF_BUILD_ARG \
         -t ${DOCKER_IMAGE_NAME}:${DOCKER_VERSION_TAG} \
         --file $SCRIPT_DIR/Dockerfile.isaaclab_arena \
         $SCRIPT_DIR/..

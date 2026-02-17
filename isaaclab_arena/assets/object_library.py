@@ -108,6 +108,85 @@ class MustardBottle(LibraryObject):
         super().__init__(instance_name=instance_name, prim_path=prim_path, initial_pose=initial_pose, scale=scale)
 
 
+#-------------------------------------------------------------------------------------------
+
+@register_asset
+class NISTGearBase(LibraryObject):
+    """
+    Encapsulates the NIST gear base object.
+    """
+
+    name = "nist_gear_base"
+    tags = ["object"]
+    usd_path = f"https://isaac-dev.ov.nvidia.com/omni/web3/omniverse://isaac-dev.ov.nvidia.com/Projects/GTC2026_IL-ARENA_NIST/gear_base.usd"
+
+    def __init__(
+        self, instance_name: str | None = None, prim_path: str | None = None, initial_pose: Pose | None = None
+    ):
+        super().__init__(instance_name=instance_name, prim_path=prim_path, initial_pose=initial_pose)
+
+@register_asset
+class SmallNistGear(LibraryObject):
+    """
+    Encapsulates the NIST small gear object.
+    """
+
+    name = "small_nist_gear"
+    tags = ["object"]
+    usd_path = f"https://isaac-dev.ov.nvidia.com/omni/web3/omniverse://isaac-dev.ov.nvidia.com/Projects/GTC2026_IL-ARENA_NIST/gear_small.usd"
+
+    def __init__(
+        self, instance_name: str | None = None, prim_path: str | None = None, initial_pose: Pose | None = None
+    ):
+        super().__init__(instance_name=instance_name, prim_path=prim_path, initial_pose=initial_pose)
+
+@register_asset
+class MediumNistGear(LibraryObject):
+    """
+    Encapsulates the NIST medium gear object.
+    """
+
+    name = "medium_nist_gear"
+    tags = ["object"]
+    usd_path = f"https://isaac-dev.ov.nvidia.com/omni/web3/omniverse://isaac-dev.ov.nvidia.com/Projects/GTC2026_IL-ARENA_NIST/gear_medium.usd"
+
+    def __init__(
+        self, instance_name: str | None = None, prim_path: str | None = None, initial_pose: Pose | None = None
+    ):
+        super().__init__(instance_name=instance_name, prim_path=prim_path, initial_pose=initial_pose)
+
+@register_asset
+class LargeNistGear(LibraryObject):
+    """
+    Encapsulates the NIST large gear object.
+    """
+
+    name = "large_nist_gear"
+    tags = ["object"]
+    usd_path = f"https://isaac-dev.ov.nvidia.com/omni/web3/omniverse://isaac-dev.ov.nvidia.com/Projects/GTC2026_IL-ARENA_NIST/gear_large.usd"
+
+    def __init__(
+        self, instance_name: str | None = None, prim_path: str | None = None, initial_pose: Pose | None = None
+    ):
+        super().__init__(instance_name=instance_name, prim_path=prim_path, initial_pose=initial_pose)
+
+@register_asset
+class NistBoard(LibraryObject):
+    """
+    Encapsulates the NIST board object.
+    """
+
+    name = "nist_board"
+    tags = ["object"]
+    usd_path = f"https://isaac-dev.ov.nvidia.com/omni/web3/omniverse://isaac-dev.ov.nvidia.com/Projects/GTC2026_IL-ARENA_NIST/nistboard.usd"
+    scale = (2.0, 2.0, 2.0)
+
+    def __init__(
+        self, instance_name: str | None = None, prim_path: str | None = None, initial_pose: Pose | None = None
+    ):
+        super().__init__(instance_name=instance_name, prim_path=prim_path, initial_pose=initial_pose)
+
+#-------------------------------------------------------------------------------------------
 @register_asset
 class SugarBox(LibraryObject):
     """
