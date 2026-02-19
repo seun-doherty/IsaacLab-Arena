@@ -19,7 +19,6 @@ from isaaclab_arena_environments.gr1_put_and_close_door_environment import GR1Pu
 from isaaclab_arena_environments.gr1_turn_stand_mixer_knob_environment import Gr1TurnStandMixerKnobEnvironment
 from isaaclab_arena_environments.kitchen_pick_and_place_environment import KitchenPickAndPlaceEnvironment
 from isaaclab_arena_environments.lift_object_environment import LiftObjectEnvironment
-from isaaclab_arena_environments.nist_gearmesh_rl_environment import NISTGearMeshRLEnvironment
 from isaaclab_arena_environments.press_button_environment import PressButtonEnvironment
 from isaaclab_arena_environments.tabletop_place_upright_environment import TableTopPlaceUprightEnvironment
 
@@ -41,7 +40,6 @@ ExampleEnvironments = {
     PressButtonEnvironment.name: PressButtonEnvironment,
     CubeGoalPoseEnvironment.name: CubeGoalPoseEnvironment,
     LiftObjectEnvironment.name: LiftObjectEnvironment,
-    NISTGearMeshRLEnvironment.name: NISTGearMeshRLEnvironment,
     TableTopPlaceUprightEnvironment.name: TableTopPlaceUprightEnvironment,
     Gr1TurnStandMixerKnobEnvironment.name: Gr1TurnStandMixerKnobEnvironment,
 }

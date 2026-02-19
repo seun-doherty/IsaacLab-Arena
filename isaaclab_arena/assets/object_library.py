@@ -4,6 +4,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 
+import re
 from typing import Any
 
 import isaaclab.sim as sim_utils
@@ -109,6 +110,25 @@ class MustardBottle(LibraryObject):
 
 
 #-------------------------------------------------------------------------------------------
+@register_asset
+class NistAssembledBoard(LibraryObject):
+    """
+    Encapsulates the NIST assembled board object.
+    """
+
+    name = "nist_assembled_board"
+    tags = ["object"]
+    usd_path = f"omniverse://isaac-dev.ov.nvidia.com/Projects/GTC2026_IL-ARENA_NIST/NIST/nist_assembled_wgears.usd"
+    spawn_cfg_addon = {
+        "rigid_props": RIGID_BODY_PROPS_HIGH_PRECISION,
+        "mass_props": sim_utils.MassPropertiesCfg(mass=0.10),
+        "collision_props": sim_utils.CollisionPropertiesCfg(contact_offset=0.0005, rest_offset=0.0),
+    }
+
+    def __init__(
+        self, instance_name: str | None = None, prim_path: str | None = None, initial_pose: Pose | None = None
+    ):
+        super().__init__(instance_name=instance_name, prim_path=prim_path, initial_pose=initial_pose)
 
 @register_asset
 class NISTGearBase(LibraryObject):
@@ -119,6 +139,11 @@ class NISTGearBase(LibraryObject):
     name = "nist_gear_base"
     tags = ["object"]
     usd_path = f"https://isaac-dev.ov.nvidia.com/omni/web3/omniverse://isaac-dev.ov.nvidia.com/Projects/GTC2026_IL-ARENA_NIST/gear_base.usd"
+    spawn_cfg_addon = {
+        "rigid_props": RIGID_BODY_PROPS_HIGH_PRECISION,
+        "mass_props": sim_utils.MassPropertiesCfg(mass=0.019),
+        "collision_props": sim_utils.CollisionPropertiesCfg(contact_offset=0.005, rest_offset=0.0),
+    }
 
     def __init__(
         self, instance_name: str | None = None, prim_path: str | None = None, initial_pose: Pose | None = None
@@ -134,6 +159,11 @@ class SmallNistGear(LibraryObject):
     name = "small_nist_gear"
     tags = ["object"]
     usd_path = f"https://isaac-dev.ov.nvidia.com/omni/web3/omniverse://isaac-dev.ov.nvidia.com/Projects/GTC2026_IL-ARENA_NIST/gear_small.usd"
+    spawn_cfg_addon = {
+        "rigid_props": RIGID_BODY_PROPS_HIGH_PRECISION,
+        "mass_props": sim_utils.MassPropertiesCfg(mass=0.019),
+        "collision_props": sim_utils.CollisionPropertiesCfg(contact_offset=0.005, rest_offset=0.0),
+    }
 
     def __init__(
         self, instance_name: str | None = None, prim_path: str | None = None, initial_pose: Pose | None = None
@@ -149,6 +179,22 @@ class MediumNistGear(LibraryObject):
     name = "medium_nist_gear"
     tags = ["object"]
     usd_path = f"https://isaac-dev.ov.nvidia.com/omni/web3/omniverse://isaac-dev.ov.nvidia.com/Projects/GTC2026_IL-ARENA_NIST/gear_medium.usd"
+    spawn_cfg_addon = {
+        "rigid_props": sim_utils.RigidBodyPropertiesCfg(
+            disable_gravity=False,
+            max_depenetration_velocity=1.0,  # Gentle depenetration to avoid explosive ejection at spawn
+            linear_damping=0.0,
+            angular_damping=0.0,
+            max_linear_velocity=1000.0,
+            max_angular_velocity=3666.0,
+            enable_gyroscopic_forces=True,
+            solver_position_iteration_count=192,
+            solver_velocity_iteration_count=1,
+            max_contact_impulse=1e32,
+        ),
+        "mass_props": sim_utils.MassPropertiesCfg(mass=0.019),
+        "collision_props": sim_utils.CollisionPropertiesCfg(contact_offset=0.005, rest_offset=0.0),
+    }
 
     def __init__(
         self, instance_name: str | None = None, prim_path: str | None = None, initial_pose: Pose | None = None
@@ -164,6 +210,11 @@ class LargeNistGear(LibraryObject):
     name = "large_nist_gear"
     tags = ["object"]
     usd_path = f"https://isaac-dev.ov.nvidia.com/omni/web3/omniverse://isaac-dev.ov.nvidia.com/Projects/GTC2026_IL-ARENA_NIST/gear_large.usd"
+    spawn_cfg_addon = {
+        "rigid_props": RIGID_BODY_PROPS_HIGH_PRECISION,
+        "mass_props": sim_utils.MassPropertiesCfg(mass=0.019),
+        "collision_props": sim_utils.CollisionPropertiesCfg(contact_offset=0.005, rest_offset=0.0),
+    }
 
     def __init__(
         self, instance_name: str | None = None, prim_path: str | None = None, initial_pose: Pose | None = None
@@ -180,6 +231,11 @@ class NistBoard(LibraryObject):
     tags = ["object"]
     usd_path = f"https://isaac-dev.ov.nvidia.com/omni/web3/omniverse://isaac-dev.ov.nvidia.com/Projects/GTC2026_IL-ARENA_NIST/nistboard.usd"
     scale = (2.0, 2.0, 2.0)
+    spawn_cfg_addon = {
+        "rigid_props": RIGID_BODY_PROPS_HIGH_PRECISION,
+        "mass_props": sim_utils.MassPropertiesCfg(mass=0.019),
+        "collision_props": sim_utils.CollisionPropertiesCfg(contact_offset=0.005, rest_offset=0.0),
+    }
 
     def __init__(
         self, instance_name: str | None = None, prim_path: str | None = None, initial_pose: Pose | None = None
@@ -244,6 +300,74 @@ class KitTray(LibraryObject):
     tags = ["object"]
     usd_path = f"https://isaac-dev.ov.nvidia.com/omni/web3/omniverse://isaac-dev.ov.nvidia.com/Projects/GTC2026_IL-ARENA_NIST/NIST/kit_tray.usd"
     scale = (1.0, 1.0, 1.0)
+    spawn_cfg_addon = {
+        "rigid_props": RIGID_BODY_PROPS_MEDIUM_PRECISION,
+        "mass_props": sim_utils.MassPropertiesCfg(mass=0.1),
+        "collision_props": sim_utils.CollisionPropertiesCfg(contact_offset=0.002, rest_offset=0.0),
+    }
+
+    def __init__(
+        self, instance_name: str | None = None, prim_path: str | None = None, initial_pose: Pose | None = None
+    ):
+        super().__init__(instance_name=instance_name, prim_path=prim_path, initial_pose=initial_pose)
+
+@register_asset
+class RJ45Plug(LibraryObject):
+    """
+    Encapsulates the RJ45 plug object.
+    """
+
+    name = "rj45_plug"
+    tags = ["object"]
+    usd_path = f"https://isaac-dev.ov.nvidia.com/omni/web3/omniverse://isaac-dev.ov.nvidia.com/Projects/GTC2026_IL-ARENA_NIST/NIST/rj45_plug.usd"
+    scale = (1.0, 1.0, 1.0)
+    spawn_cfg_addon = {
+        "rigid_props": RIGID_BODY_PROPS_HIGH_PRECISION,
+        "mass_props": sim_utils.MassPropertiesCfg(mass=0.019),
+        "collision_props": sim_utils.CollisionPropertiesCfg(contact_offset=0.005, rest_offset=0.0),
+    }
+
+    def __init__(
+        self, instance_name: str | None = None, prim_path: str | None = None, initial_pose: Pose | None = None
+    ):
+        super().__init__(instance_name=instance_name, prim_path=prim_path, initial_pose=initial_pose)
+
+@register_asset
+class UsbAPlug(LibraryObject):
+    """
+    Encapsulates the USB-A plug object.
+    """
+
+    name = "usb_a_plug"
+    tags = ["object"]
+    usd_path = f"https://isaac-dev.ov.nvidia.com/omni/web3/omniverse://isaac-dev.ov.nvidia.com/Projects/GTC2026_IL-ARENA_NIST/NIST/usb_a_plug.usd"
+    scale = (1.0, 1.0, 1.0)
+    spawn_cfg_addon = {
+        "rigid_props": RIGID_BODY_PROPS_HIGH_PRECISION,
+        "mass_props": sim_utils.MassPropertiesCfg(mass=0.019),
+        "collision_props": sim_utils.CollisionPropertiesCfg(contact_offset=0.005, rest_offset=0.0),
+    }
+
+    def __init__(
+        self, instance_name: str | None = None, prim_path: str | None = None, initial_pose: Pose | None = None
+    ):
+        super().__init__(instance_name=instance_name, prim_path=prim_path, initial_pose=initial_pose)
+
+@register_asset
+class WaterProofPlug(LibraryObject):
+    """
+    Encapsulates the Waterproof plug object.
+    """
+
+    name = "waterproof_plug"
+    tags = ["object"]
+    usd_path = f"https://isaac-dev.ov.nvidia.com/omni/web3/omniverse://isaac-dev.ov.nvidia.com/Projects/GTC2026_IL-ARENA_NIST/NIST/waterproof_plug.usd"
+    scale = (1.0, 1.0, 1.0)
+    spawn_cfg_addon = {
+        "rigid_props": RIGID_BODY_PROPS_HIGH_PRECISION,
+        "mass_props": sim_utils.MassPropertiesCfg(mass=0.019),
+        "collision_props": sim_utils.CollisionPropertiesCfg(contact_offset=0.005, rest_offset=0.0),
+    }
 
     def __init__(
         self, instance_name: str | None = None, prim_path: str | None = None, initial_pose: Pose | None = None

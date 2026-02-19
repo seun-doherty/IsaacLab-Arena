@@ -104,6 +104,125 @@ def objects_in_proximity(
     return done
 
 
+def gear_mesh_insertion_success(
+    env: ManagerBasedRLEnv,
+    held_object_cfg: SceneEntityCfg = SceneEntityCfg("medium_nist_gear"),
+    fixed_object_cfg: SceneEntityCfg = SceneEntityCfg("nist_gear_base"),
+    gear_base_offset: list[float] = [2.025e-2, 0.0, 0.0],
+    gear_peg_height: float = 0.02,
+    success_z_fraction: float = 0.80,
+    xy_threshold: float = 0.0025,
+) -> torch.Tensor:
+    """Terminate when the gear is inserted onto the peg to the required depth.
+
+    Checks that the held gear is centered on the peg (XY) and lowered past
+    a fraction of the peg height (Z). A success_z_fraction of 0.30 means
+    the gear must be 70% inserted.
+
+    Args:
+        held_object_cfg: Scene entity for the held gear.
+        fixed_object_cfg: Scene entity for the gear base.
+        gear_base_offset: XYZ offset from gear base origin to the target peg center.
+        gear_peg_height: Height of the peg in meters.
+        success_z_fraction: Remaining fraction of peg height that counts as success
+            (0.30 = 70% inserted, 0.05 = 95% inserted).
+        xy_threshold: Maximum radial distance from peg center in meters.
+    """
+    held_object: RigidObject = env.scene[held_object_cfg.name]
+    fixed_object: RigidObject = env.scene[fixed_object_cfg.name]
+
+    held_pos = held_object.data.root_pos_w - env.scene.env_origins
+    fixed_pos = fixed_object.data.root_pos_w - env.scene.env_origins
+
+    offset = torch.tensor(gear_base_offset, device=env.device)
+    target_pos = fixed_pos.clone()
+    target_pos += offset
+
+    xy_dist = torch.linalg.vector_norm(target_pos[:, 0:2] - held_pos[:, 0:2], dim=1)
+    is_centered = xy_dist < xy_threshold
+
+    z_disp = held_pos[:, 2] - target_pos[:, 2]
+    height_threshold = gear_peg_height * success_z_fraction
+    is_inserted = z_disp < height_threshold
+
+    return torch.logical_and(is_centered, is_inserted)
+
+
+def object_at_fixed_position(
+    env: ManagerBasedRLEnv,
+    object_cfg: SceneEntityCfg = SceneEntityCfg("medium_nist_gear"),
+    target_position: list[float] = [0.0, 0.0, 0.0],
+    tolerance: float = 0.005,
+) -> torch.Tensor:
+    """Terminate when the object is within a tolerance of a fixed world-space position.
+
+    Args:
+        object_cfg: Scene entity for the object to check.
+        target_position: Fixed XYZ target position in the environment frame.
+        tolerance: Maximum 3D distance in meters for success.
+    """
+    obj: RigidObject = env.scene[object_cfg.name]
+    obj_pos = obj.data.root_pos_w - env.scene.env_origins
+    target = torch.tensor(target_position, device=env.device).unsqueeze(0)
+    distance = torch.norm(obj_pos - target, dim=-1)
+    return distance < tolerance
+
+
+def gear_contact_and_z_success(
+    env: ManagerBasedRLEnv,
+    held_object_cfg: SceneEntityCfg = SceneEntityCfg("medium_nist_gear"),
+    board_cfg: SceneEntityCfg = SceneEntityCfg("nist_assembled_board"),
+    contact_sensor_cfg: SceneEntityCfg = SceneEntityCfg("gear_contact_sensor"),
+    peg_offset_from_board: list[float] = [0.0, 0.0, 0.0],
+    z_threshold: float = 0.01,
+    force_threshold: float = 1.0,
+    velocity_threshold: float = 0.5,
+) -> torch.Tensor:
+    """Terminate when the gear contacts the board AND is inserted to sufficient depth.
+
+    Two conditions must be met simultaneously:
+      1. Contact: the contact sensor between the gear and board reports force
+         above ``force_threshold`` while the gear velocity is below
+         ``velocity_threshold`` (i.e. the gear has settled).
+      2. Z-depth: the gear's Z position is below the peg top, computed as
+         the board's *live* position + ``peg_offset_from_board``, plus a
+         ``z_threshold`` margin. This keeps the check relative to the board
+         so it stays valid even if the board shifts.
+
+    Args:
+        held_object_cfg: Scene entity for the held gear.
+        board_cfg: Scene entity for the assembled board.
+        contact_sensor_cfg: Scene entity for the contact sensor on the gear.
+        peg_offset_from_board: XYZ offset from the board origin to the peg top.
+        z_threshold: The gear must be within this distance above the peg-top Z
+            to count as inserted (meters). A small positive value is forgiving.
+        force_threshold: Minimum contact force (N) to consider contact established.
+        velocity_threshold: Maximum gear velocity (m/s) to consider it settled.
+    """
+    held_object: RigidObject = env.scene[held_object_cfg.name]
+    board: RigidObject = env.scene[board_cfg.name]
+    sensor: ContactSensor = env.scene[contact_sensor_cfg.name]
+
+    held_pos = held_object.data.root_pos_w - env.scene.env_origins
+    board_pos = board.data.root_pos_w - env.scene.env_origins
+
+    # Contact check: force above threshold + low velocity
+    assert sensor.data.force_matrix_w.shape[1] == 1
+    assert sensor.data.force_matrix_w.shape[2] == 1
+    force_norm = torch.norm(sensor.data.force_matrix_w.clone(), dim=-1).reshape(-1)
+    has_contact = force_norm > force_threshold
+
+    vel_norm = torch.norm(held_object.data.root_lin_vel_w, dim=-1)
+    is_settled = vel_norm < velocity_threshold
+
+    # Z-depth check: gear Z must be at or below peg top + threshold
+    offset = torch.tensor(peg_offset_from_board, device=env.device)
+    peg_top_z = board_pos[:, 2] + offset[2]
+    is_deep_enough = held_pos[:, 2] < (peg_top_z + z_threshold)
+
+    return has_contact & is_settled & is_deep_enough
+
+
 def lift_object_il_success(
     env: ManagerBasedRLEnv,
     object_cfg: SceneEntityCfg = SceneEntityCfg("object"),
