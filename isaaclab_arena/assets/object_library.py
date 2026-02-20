@@ -120,9 +120,21 @@ class NistAssembledBoard(LibraryObject):
     tags = ["object"]
     usd_path = f"omniverse://isaac-dev.ov.nvidia.com/Projects/GTC2026_IL-ARENA_NIST/NIST/nist_assembled_wgears.usd"
     spawn_cfg_addon = {
-        "rigid_props": RIGID_BODY_PROPS_HIGH_PRECISION,
-        "mass_props": sim_utils.MassPropertiesCfg(mass=0.10),
-        "collision_props": sim_utils.CollisionPropertiesCfg(contact_offset=0.0005, rest_offset=0.0),
+        "rigid_props": sim_utils.RigidBodyPropertiesCfg(
+            disable_gravity=False,
+            kinematic_enabled=True,
+            max_depenetration_velocity=5.0,
+            linear_damping=0.0,
+            angular_damping=0.0,
+            max_linear_velocity=1000.0,
+            max_angular_velocity=3666.0,
+            enable_gyroscopic_forces=True,
+            solver_position_iteration_count=32,
+            solver_velocity_iteration_count=1,
+            max_contact_impulse=1e32,
+        ),
+        "mass_props": sim_utils.MassPropertiesCfg(mass=None),
+        "collision_props": sim_utils.CollisionPropertiesCfg(contact_offset=0.002, rest_offset=0.0),
     }
 
     def __init__(
@@ -178,21 +190,22 @@ class MediumNistGear(LibraryObject):
 
     name = "medium_nist_gear"
     tags = ["object"]
-    usd_path = f"https://isaac-dev.ov.nvidia.com/omni/web3/omniverse://isaac-dev.ov.nvidia.com/Projects/GTC2026_IL-ARENA_NIST/gear_medium.usd"
+    usd_path = f"omniverse://isaac-dev.ov.nvidia.com/Projects/GTC2026_IL-ARENA_NIST/NIST/gear_medium.usd"
     spawn_cfg_addon = {
         "rigid_props": sim_utils.RigidBodyPropertiesCfg(
             disable_gravity=False,
-            max_depenetration_velocity=1.0,  # Gentle depenetration to avoid explosive ejection at spawn
+            kinematic_enabled=False,
+            max_depenetration_velocity=5.0,
             linear_damping=0.0,
             angular_damping=0.0,
             max_linear_velocity=1000.0,
             max_angular_velocity=3666.0,
             enable_gyroscopic_forces=True,
-            solver_position_iteration_count=192,
+            solver_position_iteration_count=32,
             solver_velocity_iteration_count=1,
             max_contact_impulse=1e32,
         ),
-        "mass_props": sim_utils.MassPropertiesCfg(mass=0.019),
+        "mass_props": sim_utils.MassPropertiesCfg(mass=None),
         "collision_props": sim_utils.CollisionPropertiesCfg(contact_offset=0.005, rest_offset=0.0),
     }
 

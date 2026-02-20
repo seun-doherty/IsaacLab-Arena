@@ -10,8 +10,13 @@ as a single composite asset. Only the medium gear is a separate object that
 the robot must pick up and insert onto the peg.
 """
 
-import numpy as np
+from __future__ import annotations
+
+from collections.abc import Callable
 from dataclasses import MISSING
+from typing import TYPE_CHECKING
+
+import numpy as np
 
 import isaaclab.envs.mdp as mdp_isaac_lab
 from isaaclab.envs.common import ViewerCfg
@@ -24,7 +29,13 @@ from isaaclab_arena.metrics.metric_base import MetricBase
 from isaaclab_arena.metrics.success_rate import SuccessRateMetric
 from isaaclab_arena.tasks.task_base import TaskBase
 from isaaclab_arena.tasks.terminations import gear_mesh_insertion_success
+from isaaclab_arena.terms.events import place_gear_in_gripper
 from isaaclab_arena.utils.cameras import get_viewer_cfg_look_at_object
+
+if TYPE_CHECKING:
+    from collections.abc import Sequence
+
+    import torch
 
 
 class NistGearInsertionTask(TaskBase):
@@ -46,6 +57,16 @@ class NistGearInsertionTask(TaskBase):
         xy_threshold: float = 0.0025,
         episode_length_s: float | None = None,
         task_description: str | None = None,
+        start_in_gripper: bool = False,
+        num_arm_joints: int = 7,
+        hand_grasp_width: float = 0.03,
+        hand_close_width: float = 0.0,
+        gripper_joint_setter_func: Callable[
+            [torch.Tensor, Sequence[int], Sequence[int], float], None
+        ] | None = None,
+        end_effector_body_name: str = "panda_hand",
+        grasp_rot_offset: list[float] | None = None,
+        grasp_offset: list[float] | None = None,
     ):
         super().__init__(episode_length_s=episode_length_s)
         self.assembled_board = assembled_board
@@ -55,6 +76,14 @@ class NistGearInsertionTask(TaskBase):
         self.gear_peg_height = gear_peg_height
         self.success_z_fraction = success_z_fraction
         self.xy_threshold = xy_threshold
+        self.start_in_gripper = start_in_gripper
+        self.num_arm_joints = num_arm_joints
+        self.hand_grasp_width = hand_grasp_width
+        self.hand_close_width = hand_close_width
+        self.gripper_joint_setter_func = gripper_joint_setter_func
+        self.end_effector_body_name = end_effector_body_name
+        self.grasp_rot_offset = grasp_rot_offset or [1.0, 0.0, 0.0, 0.0]
+        self.grasp_offset = grasp_offset or [0.0, 0.0, 0.0]
         self.task_description = (
             f"Insert the {held_gear.name} onto the gear base on the {assembled_board.name}"
             if task_description is None
@@ -86,7 +115,23 @@ class NistGearInsertionTask(TaskBase):
         return _TerminationsCfg(success=success, object_dropped=object_dropped)
 
     def get_events_cfg(self):
-        return _EventsCfg()
+        cfg = _EventsCfg()
+        if self.start_in_gripper and self.gripper_joint_setter_func is not None:
+            cfg.place_gear = EventTermCfg(
+                func=place_gear_in_gripper,
+                mode="reset",
+                params={
+                    "gear_cfg": SceneEntityCfg(self.held_gear.name),
+                    "num_arm_joints": self.num_arm_joints,
+                    "hand_grasp_width": self.hand_grasp_width,
+                    "hand_close_width": self.hand_close_width,
+                    "gripper_joint_setter_func": self.gripper_joint_setter_func,
+                    "end_effector_body_name": self.end_effector_body_name,
+                    "grasp_rot_offset": self.grasp_rot_offset,
+                    "grasp_offset": self.grasp_offset,
+                },
+            )
+        return cfg
 
     def get_mimic_env_cfg(self, arm_mode: ArmMode):
         raise NotImplementedError("Function not implemented yet.")
@@ -119,3 +164,5 @@ class _EventsCfg:
         mode="reset",
         params={"reset_joint_targets": True},
     )
+
+    place_gear: EventTermCfg | None = None

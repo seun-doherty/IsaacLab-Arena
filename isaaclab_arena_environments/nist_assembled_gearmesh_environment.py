@@ -49,6 +49,24 @@ class NISTAssembledGearMeshEnvironment(ExampleEnvironmentBase):
         embodiment.scene_config.robot = mdp.FRANKA_PANDA_ASSEMBLY_HIGH_PD_CFG.replace(
             prim_path="{ENV_REGEX_NS}/Robot",
         )
+        # Hand above the peg with fingers open wide enough to avoid
+        # interpenetration with the gear at spawn.
+        embodiment.set_initial_joint_pose([
+            0.561824, 0.287201, -0.543103, -2.410188, 0.507908, 2.847644, 0.454298,
+            0.04, 0.04,
+        ])
+        # Override gripper action so both open and close commands keep
+        # the fingers closed.  This preserves the 7-D action space (no
+        # dimension mismatch with teleop devices) while ensuring the
+        # event-managed grasp is never overwritten.
+        from isaaclab.envs.mdp.actions import BinaryJointPositionActionCfg
+
+        embodiment.action_config.gripper_action = BinaryJointPositionActionCfg(
+            asset_name="robot",
+            joint_names=["panda_finger.*"],
+            open_command_expr={"panda_finger_.*": 0.0},
+            close_command_expr={"panda_finger_.*": 0.0},
+        )
 
         # Teleop
         if args_cli.teleop_device is not None:
@@ -69,7 +87,7 @@ class NISTAssembledGearMeshEnvironment(ExampleEnvironmentBase):
 
         medium_gear.set_initial_pose(
             Pose(
-                position_xyz=(0.37, 0.08, 0.05),
+                position_xyz=(0.5462, -0.02386, 0.12858),
                 rotation_wxyz=(1.0, 0.0, 0.0, 0.0),
             )
         )
@@ -82,9 +100,17 @@ class NISTAssembledGearMeshEnvironment(ExampleEnvironmentBase):
             assembled_board=assembled_board,
             held_gear=medium_gear,
             background_scene=background,
-            peg_offset_from_board=[-0.12462, -0.04432, 0.05906],
-            success_z_fraction=0.95,
+            peg_offset_from_board=[-0.15, -0.0495, 0.0],
+            success_z_fraction=0.70,
             xy_threshold=0.015,
+            start_in_gripper=True,
+            num_arm_joints=7,
+            hand_grasp_width=0.01875,
+            hand_close_width=0.0,
+            gripper_joint_setter_func=mdp.franka_gripper_joint_setter,
+            end_effector_body_name="panda_hand",
+            grasp_rot_offset=[0.0, 1.0, 0.0, 0.0],
+            grasp_offset=[0.02, 0.0, -0.12],
         )
 
         isaaclab_arena_environment = IsaacLabArenaEnvironment(
